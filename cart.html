@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Cart</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="topbar">
+    <h1>Your Cart</h1>
+</div>
+
+<!-- CENTER CONTAINER -->
+<div class="cart-container">
+    <div id="cartBox" class="cart-box"></div>
+</div>
+
+<script>
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+let box = document.getElementById("cartBox");
+
+function renderCart(){
+
+box.innerHTML = "";
+let total = 0;
+
+if(cart.length === 0){
+box.innerHTML = `<p class="empty">Your cart is empty</p>`;
+return;
+}
+
+cart.forEach((c, index)=>{
+
+// default qty
+if(!c.qty) c.qty = 1;
+
+let itemTotal = c.price * c.qty;
+total += itemTotal;
+
+box.innerHTML += `
+<div class="cart-item">
+
+    <!-- NAME -->
+    <div class="item-name">${c.name}</div>
+
+    <!-- CONTROLS -->
+    <div class="item-controls">
+
+        <button onclick="changeQty(${index}, -1)">−</button>
+        <span>${c.qty}</span>
+        <button onclick="changeQty(${index}, 1)">+</button>
+
+    </div>
+
+    <!-- PRICE -->
+    <div class="item-price">Rs ${itemTotal}</div>
+
+    <!-- REMOVE -->
+    <button class="remove-btn" onclick="removeItem(${index})">✕</button>
+
+</div>
+`;
+});
+
+// TOTAL + BUTTON
+box.innerHTML += `
+<div class="cart-total">Total: Rs ${total}</div>
+
+<button class="order-btn" onclick="order()">
+Order on WhatsApp
+</button>
+`;
+}
+
+// CHANGE QTY
+function changeQty(index, change){
+cart[index].qty += change;
+
+if(cart[index].qty <= 0){
+cart.splice(index,1);
+}
+
+localStorage.setItem("cart", JSON.stringify(cart));
+renderCart();
+}
+
+// REMOVE ITEM
+function removeItem(index){
+cart.splice(index,1);
+localStorage.setItem("cart", JSON.stringify(cart));
+renderCart();
+}
+
+// ORDER
+function order(){
+let msg="Order:%0A";
+
+cart.forEach((c,i)=>{
+msg += `${i+1}. ${c.name} x${c.qty} - Rs ${c.price * c.qty}%0A`;
+});
+
+window.open("https://wa.me/923338181082?text="+msg);
+}
+
+// INIT
+renderCart();
+</script>
+
+</body>
+</html>
